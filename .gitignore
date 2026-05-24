@@ -1,0 +1,16 @@
+﻿# Temp / editor files
+*.TMP
+*~
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
