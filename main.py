@@ -6,20 +6,6 @@ from src.config import CAM_CFG
 from src.pipeline import process_frame
 
 
-def _extract_shape_type(status):
-    """Extract shape type from status string like 'RECT D=320 X=15'"""
-    if not status:
-        return "NONE"
-    if status.startswith("NO_A4"):
-        return "NONE"
-    if status.startswith("A4 "):
-        return "NONE"
-    for t in ("RECT", "CIRCLE", "TRI", "SHAPE"):
-        if status.startswith(t):
-            return t
-    return "NONE"
-
-
 def setup_sensor():
     sensor.reset()
     sensor.set_pixformat(CAM_CFG["pixformat"])
@@ -53,7 +39,7 @@ def main():
 
             d_val = result.get("d_mm", 0)
             x_val = result.get("x_mm", 0)
-            shape = _extract_shape_type(result.get("status", ""))
+            shape = result.get("shape_type", "NONE")
 
             # UART3 -> H7: D, X, shape type
             uart.write("D:%.1f,X:%.1f,S:%s\n" % (d_val, x_val, shape))
