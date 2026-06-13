@@ -1,4 +1,4 @@
-﻿from src.detectors import (
+from src.detectors import (
     binary_auto,
     detect_a4_blob,
     detect_anchor_blob,
@@ -41,7 +41,6 @@ def process_frame(img):
             "status": "NO_A4 T=%d M=%d" % (thr, mean_v),
             "d_mm": 0.0,
             "x_mm": 0.0,
-            "shape_type": "NONE",
         }
 
     a4_rect = a4["rect"]
@@ -80,11 +79,11 @@ def process_frame(img):
     )
 
     if shape_count <= 0:
+        status = "A4 D=%.0f T=%d" % (distance_mm, thr)
         return {
             "status": "A4 D=%.0f T=%d" % (distance_mm, thr),
             "d_mm": distance_mm,
             "x_mm": 0.0,
-            "shape_type": "NONE",
         }
     else:
         mode = "SHAPE"
@@ -95,9 +94,10 @@ def process_frame(img):
         elif circle_count > 0:
             mode = "CIRCLE"
         size_mm = estimate_size_mm_from_shape_rect(shape_rect, a4_rect, best_shape_type)
+        status = "%s D=%.0f X=%.0f" % (mode, distance_mm, size_mm)
         return {
             "status": "%s D=%.0f X=%.0f" % (mode, distance_mm, size_mm),
             "d_mm": distance_mm,
             "x_mm": size_mm,
-            "shape_type": mode,
         }
+    return {"status": status, "uart_line": uart_line}
