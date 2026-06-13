@@ -29,6 +29,14 @@ def _clip_text(text, max_chars):
     return text[: max_chars - 3] + "..."
 
 
+def _shape_from_status(status):
+    """Extract shape type from status string like 'RECT D=320 X=15'"""
+    for t in ("RECT", "CIRCLE", "TRI", "SHAPE"):
+        if status.startswith(t):
+            return t
+    return "NONE"
+
+
 def setup_sensor():
     sensor.reset()
     sensor.set_pixformat(CAM_CFG["pixformat"])
@@ -87,14 +95,15 @@ def main():
 
             _draw_debug_overlay(img, clock.fps(), result["status"], frame_id)
 
-            # ---- UART3: send D/X to H7 ----
+            # ---- UART3: send D/X/S to H7 ----
             d_val = result.get("d_mm", 0)
             x_val = result.get("x_mm", 0)
-            uart.write("D:%.1f,X:%.1f\n" % (d_val, x_val))
+            shape = _shape_from_status(result.get("status", ""))
+            uart.write("D:%.1f,X:%.1f,S:%s\n" % (d_val, x_val, shape))
 
             # ---- PC debug ----
-            print("[F#%d] CAP=%dus PROC=%dus FPS=%.1f | D=%.1f X=%.1f"
-                  % (frame_id, t_cap, t_proc, clock.fps(), d_val, x_val))
+            print("[F#%d] CAP=%dus PROC=%dus FPS=%.1f | D=%.1f X=%.1f S=%s"
+                  % (frame_id, t_cap, t_proc, clock.fps(), d_val, x_val, shape))
 
             led_err.off()
         except Exception as exc:
